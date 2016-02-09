@@ -29,28 +29,29 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C and LGPL licenses and that you accept their terms.
  */
-package org.graphstream.graph;
+package org.graphstream.graph.temporalNetwork;
 
-import org.graphstream.graph.temporalNetwork.AttributesTimeline;
-import org.graphstream.graph.temporalNetwork.TemporalTimeline;
+import org.graphstream.graph.TemporalEdge;
+import org.graphstream.graph.TemporalNode;
+
+import java.util.List;
 
 /**
- *
+ * @since 08/02/16.
  */
-public interface TemporalElement {
-    String getId();
+public class NeighbourTimeline {
+    protected final TemporalNode node;
+    protected List<TemporalEdge> edges;
 
-    TemporalTimeline<? extends Element> getElementTimeline();
+    public NeighbourTimeline(TemporalNode node) {
+        this.node = node;
+    }
 
-    AttributesTimeline getAttributesTimeline();
+    public void addEdge(TemporalEdge edge) {
+        edges.add(edge);
+    }
 
-    boolean existsAt(double date);
+    public int getDegreeAt(double date) {
 
-    Element getElementAt(double date);
-
-    void addAt(double date);
-
-    void removeAt(double date);
-
-    TemporalNetwork getTemporalNetwork();
+    }
 }

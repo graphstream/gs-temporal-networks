@@ -34,6 +34,12 @@ package org.graphstream.graph;
 /**
  *
  */
-public interface TemporalEdge extends Edge, TemporalElement {
+public interface TemporalEdge extends TemporalElement {
     Edge getEdgeAt(double date);
+
+    TemporalNode getSourceNode();
+
+    TemporalNode getTargetNode();
+
+    boolean isDirected();
 }

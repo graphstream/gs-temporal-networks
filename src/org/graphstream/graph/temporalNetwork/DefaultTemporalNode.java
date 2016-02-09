@@ -29,28 +29,38 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-C and LGPL licenses and that you accept their terms.
  */
-package org.graphstream.graph;
+package org.graphstream.graph.temporalNetwork;
 
-import org.graphstream.graph.temporalNetwork.AttributesTimeline;
-import org.graphstream.graph.temporalNetwork.TemporalTimeline;
+import org.graphstream.graph.*;
+import org.graphstream.graph.implementations.AbstractElement;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- *
+ * @since 05/02/16.
  */
-public interface TemporalElement {
-    String getId();
+public class DefaultTemporalNode extends DefaultTemporalElement<NodeSnapshot> implements TemporalNode {
+    protected List<TemporalEdge> edges;
 
-    TemporalTimeline<? extends Element> getElementTimeline();
+    public DefaultTemporalNode(TemporalNetwork network, String nodeId, double creationDate) {
+        super(network, nodeId, network.getTotalNodeCount(), creationDate);
 
-    AttributesTimeline getAttributesTimeline();
+    }
 
-    boolean existsAt(double date);
+    @Override
+    protected void attributeChanged(AbstractElement.AttributeChangeEvent event, String attribute, Object oldValue, Object newValue) {
 
-    Element getElementAt(double date);
+    }
 
-    void addAt(double date);
+    @Override
+    protected NodeSnapshot createSnapshot(double date) {
+        return new NodeSnapshot(this, date);
+    }
 
-    void removeAt(double date);
-
-    TemporalNetwork getTemporalNetwork();
+    @Override
+    public Node getNodeAt(double date) {
+        return null;
+    }
 }

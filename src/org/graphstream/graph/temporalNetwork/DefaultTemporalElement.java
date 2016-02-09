@@ -33,20 +33,25 @@ package org.graphstream.graph.temporalNetwork;
 
 import org.graphstream.graph.Element;
 import org.graphstream.graph.TemporalElement;
-
-import java.util.*;
+import org.graphstream.graph.TemporalNetwork;
+import org.graphstream.graph.implementations.AbstractElement;
 
 /**
  *
  */
-public class DefaultTemporalElement implements TemporalElement {
+public abstract class DefaultTemporalElement<T extends ElementSnapshot> implements TemporalElement {
     protected final String id;
-    protected TemporalTimeline<ElementSnapshot> timeline;
-    protected ElementSnapshot currentSnapshot;
+    protected final int index;
+
+    protected final TemporalNetwork network;
+    protected TemporalTimeline<T> timeline;
+    protected T currentSnapshot;
     protected AttributesTimeline attributes;
 
-    protected DefaultTemporalElement(String id, double creationDate) {
+    protected DefaultTemporalElement(TemporalNetwork network, String id, int index, double creationDate) {
         this.id = id;
+        this.index = index;
+        this.network = network;
 
         attributes = new AttributesTimeline();
         timeline = new TemporalTimeline<>();
@@ -54,6 +59,21 @@ public class DefaultTemporalElement implements TemporalElement {
 
         timeline.startTimeWindow(creationDate, currentSnapshot);
     }
+
+    /**
+     * Called for each change in the attribute set. This method must be
+     * implemented by sub-elements in order to send events to the graph
+     * listeners.
+     *
+     * @param attribute The attribute name that changed.
+     * @param event     The type of event among ADD, CHANGE and REMOVE.
+     * @param oldValue  The old value of the attribute, null if the attribute was
+     *                  added.
+     * @param newValue  The new value of the attribute, null if the attribute is about
+     *                  to be removed.
+     */
+    protected abstract void attributeChanged(AbstractElement.AttributeChangeEvent event,
+                                             String attribute, Object oldValue, Object newValue);
 
     /*
      * @see org.graphstream.graph.TemporalElement#getElementTimeline()
@@ -91,298 +111,21 @@ public class DefaultTemporalElement implements TemporalElement {
         timeline.endTimeWindow(date);
     }
 
-    protected ElementSnapshot createSnapshot(double date) {
-        return new ElementSnapshot(date);
-    }
+    protected abstract T createSnapshot(double date);
 
-    /*
-     * @see org.graphstream.graph.Element#getId()
-     */
+
     @Override
     public String getId() {
         return id;
     }
 
     @Override
-    public int getIndex() {
-        return currentSnapshot.getIndex();
+    public AttributesTimeline getAttributesTimeline() {
+        return attributes;
     }
 
     @Override
-    public <T> T getAttribute(String key) {
-        return currentSnapshot.getAttribute(key);
-    }
-
-    @Override
-    public <T> T getFirstAttributeOf(String... keys) {
-        return currentSnapshot.getFirstAttributeOf(keys);
-    }
-
-    @Override
-    public <T> T getAttribute(String key, Class<T> clazz) {
-        return currentSnapshot.getAttribute(key, clazz);
-    }
-
-    @Override
-    public <T> T getFirstAttributeOf(Class<T> clazz, String... keys) {
-        return currentSnapshot.getFirstAttributeOf(clazz, keys);
-    }
-
-    @Override
-    public CharSequence getLabel(String key) {
-        return currentSnapshot.getLabel(key);
-    }
-
-    @Override
-    public double getNumber(String key) {
-        return currentSnapshot.getNumber(key);
-    }
-
-    @Override
-    public ArrayList<? extends Number> getVector(String key) {
-        return currentSnapshot.getVector(key);
-    }
-
-    @Override
-    public Object[] getArray(String key) {
-        return currentSnapshot.getArray(key);
-    }
-
-    @Override
-    public HashMap<?, ?> getHash(String key) {
-        return currentSnapshot.getHash(key);
-    }
-
-    @Override
-    public boolean hasAttribute(String key) {
-        return currentSnapshot.hasAttribute(key);
-    }
-
-    @Override
-    public boolean hasAttribute(String key, Class<?> clazz) {
-        return currentSnapshot.hasAttribute(key, clazz);
-    }
-
-    @Override
-    public boolean hasLabel(String key) {
-        return currentSnapshot.hasLabel(key);
-    }
-
-    @Override
-    public boolean hasNumber(String key) {
-        return currentSnapshot.hasNumber(key);
-    }
-
-    @Override
-    public boolean hasVector(String key) {
-        return currentSnapshot.hasVector(key);
-    }
-
-    @Override
-    public boolean hasArray(String key) {
-        return currentSnapshot.hasArray(key);
-    }
-
-    @Override
-    public boolean hasHash(String key) {
-        return currentSnapshot.hasHash(key);
-    }
-
-    @Override
-    public Iterator<String> getAttributeKeyIterator() {
-        return currentSnapshot.getAttributeKeyIterator();
-    }
-
-    @Override
-    public Iterable<String> getEachAttributeKey() {
-        return currentSnapshot.getEachAttributeKey();
-    }
-
-    @Override
-    public Collection<String> getAttributeKeySet() {
-        return currentSnapshot.getAttributeKeySet();
-    }
-
-    @Override
-    public void clearAttributes() {
-        currentSnapshot.clearAttributes();
-    }
-
-    @Override
-    public void addAttribute(String attribute, Object... values) {
-        currentSnapshot.addAttribute(attribute, values);
-    }
-
-    @Override
-    public void changeAttribute(String attribute, Object... values) {
-        currentSnapshot.changeAttribute(attribute, values);
-    }
-
-    @Override
-    public void setAttribute(String attribute, Object... values) {
-        currentSnapshot.setAttribute(attribute, values);
-    }
-
-    @Override
-    public void addAttributes(Map<String, Object> attributes) {
-        currentSnapshot.addAttributes(attributes);
-    }
-
-    @Override
-    public void removeAttribute(String attribute) {
-        currentSnapshot.removeAttribute(attribute);
-    }
-
-    @Override
-    public int getAttributeCount() {
-        return currentSnapshot.getAttributeCount();
-    }
-
-    protected class ElementSnapshot implements Element {
-        protected double snapshotDate;
-
-        protected ElementSnapshot(double date) {
-            snapshotDate = date;
-        }
-
-        @Override
-        public String getId() {
-            return DefaultTemporalElement.this.id;
-        }
-
-        @Override
-        public int getIndex() {
-            return -1;
-        }
-
-        @Override
-        public <T> T getAttribute(String key) {
-            return null;
-        }
-
-        @Override
-        public <T> T getFirstAttributeOf(String... keys) {
-            return null;
-        }
-
-        @Override
-        public <T> T getAttribute(String key, Class<T> clazz) {
-            return null;
-        }
-
-        @Override
-        public <T> T getFirstAttributeOf(Class<T> clazz, String... keys) {
-            return null;
-        }
-
-        @Override
-        public CharSequence getLabel(String key) {
-            return null;
-        }
-
-        @Override
-        public double getNumber(String key) {
-            return 0;
-        }
-
-        @Override
-        public ArrayList<? extends Number> getVector(String key) {
-            return null;
-        }
-
-        @Override
-        public Object[] getArray(String key) {
-            return new Object[0];
-        }
-
-        @Override
-        public HashMap<?, ?> getHash(String key) {
-            return null;
-        }
-
-        @Override
-        public boolean hasAttribute(String key) {
-            return false;
-        }
-
-        @Override
-        public boolean hasAttribute(String key, Class<?> clazz) {
-            return false;
-        }
-
-        @Override
-        public boolean hasLabel(String key) {
-            return false;
-        }
-
-        @Override
-        public boolean hasNumber(String key) {
-            return false;
-        }
-
-        @Override
-        public boolean hasVector(String key) {
-            return false;
-        }
-
-        @Override
-        public boolean hasArray(String key) {
-            return false;
-        }
-
-        @Override
-        public boolean hasHash(String key) {
-            return false;
-        }
-
-        @Override
-        public Iterator<String> getAttributeKeyIterator() {
-            return null;
-        }
-
-        @Override
-        public Iterable<String> getEachAttributeKey() {
-            return null;
-        }
-
-        @Override
-        public Collection<String> getAttributeKeySet() {
-            return null;
-        }
-
-        @Override
-        public void clearAttributes() {
-
-        }
-
-        @Override
-        public void addAttribute(String attribute, Object... values) {
-
-        }
-
-        @Override
-        public void changeAttribute(String attribute, Object... values) {
-
-        }
-
-        @Override
-        public void setAttribute(String attribute, Object... values) {
-
-        }
-
-        @Override
-        public void addAttributes(Map<String, Object> attributes) {
-
-        }
-
-        @Override
-        public void removeAttribute(String attribute) {
-
-        }
-
-        @Override
-        public int getAttributeCount() {
-            return 0;
-        }
+    public TemporalNetwork getTemporalNetwork() {
+        return network;
     }
 }

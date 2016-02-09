@@ -34,6 +34,6 @@ package org.graphstream.graph;
 /**
  *
  */
-public interface TemporalNode extends Node, TemporalElement {
+public interface TemporalNode extends TemporalElement {
     Node getNodeAt(double date);
 }

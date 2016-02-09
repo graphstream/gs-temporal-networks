@@ -34,5 +34,14 @@ package org.graphstream.graph;
 /**
  *
  */
-public interface TemporalNetwork extends Graph {
+public interface TemporalNetwork {
+    int getTotalNodeCount();
+
+    int getTotalEdgeCount();
+
+    Graph getGraphAt(double date);
+
+    TemporalNode getTemporalNode(String nodeId);
+
+    TemporalEdge getTemporalEdge(String edgeId);
 }

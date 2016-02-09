@@ -32,6 +32,7 @@
 package org.graphstream.graph.temporalNetwork;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -46,6 +47,11 @@ public class AttributesTimeline {
 
     public AttributesTimeline() {
         attributes = new HashMap<>();
+    }
+
+    public boolean hasAttributeAt(String key, double date) {
+        TemporalTimeline<?> ttl = attributes.get(key);
+        return ttl == null ? false : ttl.getValueAt(date) != null;
     }
 
     @SuppressWarnings("unchecked")
@@ -115,5 +121,57 @@ public class AttributesTimeline {
         }
 
         return c;
+    }
+
+    public Iterator<String> getKeyIteratorAt(double date) {
+        return new KeyIteratorAt(date);
+    }
+
+    protected class KeyIteratorAt implements Iterator<String> {
+        protected final double date;
+        Iterator<Map.Entry<String, TemporalTimeline<Object>>> it;
+
+        String prev, next;
+
+        KeyIteratorAt(double date) {
+            this.date = date;
+            it = attributes.entrySet().iterator();
+            prev = null;
+
+            findNext();
+        }
+
+        void findNext() {
+            next = null;
+
+            while (next == null && it.hasNext()) {
+                Map.Entry<String, TemporalTimeline<Object>> e = it.next();
+                TemporalTimeline<Object> ttl = e.getValue();
+
+                if (ttl.existsAt(date)) {
+                    next = e.getKey();
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public String next() {
+            prev = next;
+            findNext();
+
+            return prev;
+        }
+
+        @Override
+        public void remove() {
+            if (prev != null) {
+                removeAttributeAt(prev, date);
+            }
+        }
     }
 }
